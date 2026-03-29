@@ -409,6 +409,13 @@ import {
 } from "../snapping";
 import { Renderer } from "../scene/Renderer";
 import {
+  createEdgeScrollState,
+  updateEdgeScrollPointer,
+  startEdgeScroll,
+  stopEdgeScroll,
+  getEdgeScrollDelta,
+} from "../edgeScrolling";
+import {
   setEraserCursor,
   setCursor,
   resetCursor,
@@ -737,6 +744,8 @@ class App extends React.Component<AppProps, AppState> {
     [event: PointerEvent | null]
   >();
   onRemoveEventListenersEmitter = new Emitter<[]>();
+
+  edgeScrollState = createEdgeScrollState();
 
   api: ExcalidrawImperativeAPI;
 
@@ -9797,8 +9806,14 @@ class App extends React.Component<AppProps, AppState> {
           this.state.activeEmbeddable?.state !== "active"
         ) {
           const dragOffset = {
-            x: pointerCoords.x - pointerDownState.drag.origin.x,
-            y: pointerCoords.y - pointerDownState.drag.origin.y,
+            x:
+              pointerCoords.x -
+              pointerDownState.drag.origin.x +
+              this.edgeScrollState.scrollDeltaX,
+            y:
+              pointerCoords.y -
+              pointerDownState.drag.origin.y +
+              this.edgeScrollState.scrollDeltaY,
           };
 
           const originalElements = [
@@ -9956,6 +9971,44 @@ class App extends React.Component<AppProps, AppState> {
             // should be removed
             selectionElement: null,
           });
+
+          // Edge scrolling: auto-pan when pointer is near viewport edges
+          {
+            const viewportX = event.clientX - this.state.offsetLeft;
+            const viewportY = event.clientY - this.state.offsetTop;
+            updateEdgeScrollPointer(
+              this.edgeScrollState,
+              viewportX,
+              viewportY,
+            );
+            const { dx, dy } = getEdgeScrollDelta(
+              viewportX,
+              viewportY,
+              this.state.width,
+              this.state.height,
+              this.state.zoom.value,
+            );
+            if (dx !== 0 || dy !== 0) {
+              if (!this.edgeScrollState.active) {
+                startEdgeScroll(
+                  this.edgeScrollState,
+                  (scrollDx, scrollDy) => {
+                    this.translateCanvas((prevState) => ({
+                      scrollX: prevState.scrollX - scrollDx,
+                      scrollY: prevState.scrollY - scrollDy,
+                    }));
+                  },
+                  () => ({
+                    width: this.state.width,
+                    height: this.state.height,
+                    zoom: this.state.zoom.value,
+                  }),
+                );
+              }
+            } else {
+              stopEdgeScroll(this.edgeScrollState);
+            }
+          }
 
           // We duplicate the selected element if alt is pressed on pointer move
           if (event.altKey && !pointerDownState.hit.hasBeenDuplicated) {
@@ -10453,6 +10506,8 @@ class App extends React.Component<AppProps, AppState> {
       if (getFeatureFlag("COMPLEX_BINDINGS")) {
         this.resetDelayedBindMode();
       }
+
+      stopEdgeScroll(this.edgeScrollState);
 
       this.setState({
         selectedElementsAreBeingDragged: false,
