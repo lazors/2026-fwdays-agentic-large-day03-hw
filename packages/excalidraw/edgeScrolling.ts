@@ -4,6 +4,8 @@ const MAX_SPEED = 20;
 export type EdgeScrollState = {
   pointerX: number;
   pointerY: number;
+  lastScenePointerX: number;
+  lastScenePointerY: number;
   animationFrameId: number | null;
   active: boolean;
   scrollDeltaX: number;
@@ -13,6 +15,8 @@ export type EdgeScrollState = {
 export const createEdgeScrollState = (): EdgeScrollState => ({
   pointerX: 0,
   pointerY: 0,
+  lastScenePointerX: 0,
+  lastScenePointerY: 0,
   animationFrameId: null,
   active: false,
   scrollDeltaX: 0,
@@ -56,8 +60,10 @@ export const getEdgeScrollDelta = (
   dy = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, dy));
 
   // Adjust for zoom so scene-coordinate shift is consistent
-  dx /= zoom;
-  dy /= zoom;
+  if (Number.isFinite(zoom) && zoom > 0) {
+    dx /= zoom;
+    dy /= zoom;
+  }
 
   return { dx, dy };
 };
@@ -102,7 +108,9 @@ export const startEdgeScroll = (
       state.scrollDeltaY += dy;
       onScrollChange(dx, dy);
     }
-    state.animationFrameId = requestAnimationFrame(tick);
+    if (state.active) {
+      state.animationFrameId = requestAnimationFrame(tick);
+    }
   };
 
   state.animationFrameId = requestAnimationFrame(tick);

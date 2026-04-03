@@ -74,6 +74,27 @@ describe("getEdgeScrollDelta", () => {
     expect(atHalf.dx).toBeCloseTo(at1x.dx * 2);
   });
 
+  it("handles zoom of 0 by treating it as zoom=1 (no division by zero)", () => {
+    const at1x = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, 1);
+    const atZero = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, 0);
+    expect(atZero.dx).toBeCloseTo(at1x.dx);
+    expect(atZero.dy).toBeCloseTo(at1x.dy);
+  });
+
+  it("handles negative zoom by treating it as zoom=1", () => {
+    const at1x = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, 1);
+    const atNeg = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, -1);
+    expect(atNeg.dx).toBeCloseTo(at1x.dx);
+    expect(atNeg.dy).toBeCloseTo(at1x.dy);
+  });
+
+  it("handles NaN zoom by treating it as zoom=1", () => {
+    const at1x = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, 1);
+    const atNaN = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, NaN);
+    expect(atNaN.dx).toBeCloseTo(at1x.dx);
+    expect(atNaN.dy).toBeCloseTo(at1x.dy);
+  });
+
   it("gives approximately 50% speed at halfway into the edge zone", () => {
     const atEdge = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, zoom);
     const halfway = getEdgeScrollDelta(EDGE_THRESHOLD / 2, 400, viewportWidth, viewportHeight, zoom);

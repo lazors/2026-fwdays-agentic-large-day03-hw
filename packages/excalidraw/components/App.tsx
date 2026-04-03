@@ -3176,6 +3176,8 @@ class App extends React.Component<AppProps, AppState> {
       }
     }
 
+    stopEdgeScroll(this.edgeScrollState);
+
     this.editorLifecycleEvents.emit("editor:unmount");
     this.props.onUnmount?.();
     this.props.onExcalidrawAPI?.(null);
@@ -9981,6 +9983,8 @@ class App extends React.Component<AppProps, AppState> {
               viewportX,
               viewportY,
             );
+            this.edgeScrollState.lastScenePointerX = pointerCoords.x;
+            this.edgeScrollState.lastScenePointerY = pointerCoords.y;
             const { dx, dy } = getEdgeScrollDelta(
               viewportX,
               viewportY,
@@ -9997,6 +10001,35 @@ class App extends React.Component<AppProps, AppState> {
                       scrollX: prevState.scrollX - scrollDx,
                       scrollY: prevState.scrollY - scrollDy,
                     }));
+                    // Update dragged element positions to follow the pan
+                    const edgeDragOffset = {
+                      x:
+                        this.edgeScrollState.lastScenePointerX -
+                        pointerDownState.drag.origin.x +
+                        this.edgeScrollState.scrollDeltaX,
+                      y:
+                        this.edgeScrollState.lastScenePointerY -
+                        pointerDownState.drag.origin.y +
+                        this.edgeScrollState.scrollDeltaY,
+                    };
+                    const edgeSelectedElements =
+                      this.scene.getSelectedElements({
+                        selectedElementIds: this.state.selectedElementIds,
+                        includeBoundTextElement: true,
+                      });
+                    if (
+                      edgeSelectedElements.length > 0 &&
+                      !this.state.editingFrame
+                    ) {
+                      dragSelectedElements(
+                        pointerDownState,
+                        edgeSelectedElements,
+                        edgeDragOffset,
+                        this.scene,
+                        { x: 0, y: 0 },
+                        null,
+                      );
+                    }
                   },
                   () => ({
                     width: this.state.width,

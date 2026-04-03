@@ -20,3 +20,4 @@
 - [x] 4.1 Write unit tests for `getEdgeScrollDelta` covering: pointer in center (no delta), pointer at each edge (max delta), pointer in corner (diagonal delta), zoom scaling (2x halves delta, 0.5x doubles delta), and pointer exactly at threshold boundary (zero delta)
 - [x] 4.2 Write unit tests for `startEdgeScroll` / `stopEdgeScroll` lifecycle: verify rAF is requested on start, cancelled on stop, and that `onTick` receives correct deltas
 - [x] 4.3 Run `yarn test:typecheck` to verify no type errors introduced
+- [ ] 4.4 Run `yarn build` to verify project builds successfully
