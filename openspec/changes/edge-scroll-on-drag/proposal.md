@@ -1,3 +1,5 @@
+# Edge Scroll on Drag
+
 ## Why
 
 When dragging selected elements to a location that is off-screen, users must drop the selection, manually pan the canvas, then re-select and drag again — often multiple times. This breaks flow and makes large-canvas work tedious. Edge scrolling (auto-panning when the cursor reaches the viewport edge during a drag) is a standard UX pattern in design tools that eliminates this friction.

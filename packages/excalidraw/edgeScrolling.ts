@@ -1,5 +1,8 @@
 export const EDGE_THRESHOLD = 60;
-const MAX_SPEED = 20;
+// Maximum pan speed in pixels per animation frame at the viewport edge.
+// Paired with EDGE_THRESHOLD to form the linear ramp: speed scales from
+// 0 at EDGE_THRESHOLD px from the edge to MAX_SPEED at the edge itself.
+export const MAX_SPEED = 20;
 
 export type EdgeScrollState = {
   pointerX: number;

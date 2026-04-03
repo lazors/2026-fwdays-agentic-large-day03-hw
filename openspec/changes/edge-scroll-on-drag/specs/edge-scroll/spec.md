@@ -59,6 +59,11 @@ The pan speed in scene coordinates SHALL be divided by the current zoom value so
 - **WHEN** the pointer is at the viewport edge
 - **THEN** the scene-coordinate pan delta per frame SHALL be double what it would be at 1.0 zoom
 
+#### Scenario: Panning with invalid zoom (0 or negative)
+- **GIVEN** the viewport size is set, the current zoom is 0 or a negative value, and the user is dragging selected elements
+- **WHEN** the pointer is at the viewport edge
+- **THEN** the zoom divisor SHALL be treated as 1.0 (zoom scaling is skipped), so the pan delta per frame equals what it would be at 1.0 zoom; implementations SHALL guard the division by checking that zoom is a finite positive number before applying it
+
 ### Requirement: Dragged elements maintain position relative to cursor during auto-pan
 While the canvas auto-pans, the dragged elements SHALL move in sync with the pan so that the elements remain under the cursor at the same offset.
 
@@ -81,7 +86,7 @@ The auto-pan animation loop SHALL stop immediately when the user releases the po
 - **THEN** auto-pan SHALL stop and normal drag behavior SHALL resume
 
 ### Requirement: Auto-pan only activates during element drag
-Edge scrolling SHALL only activate when the user is actively dragging selected elements. It SHALL NOT activate during other pointer operations.
+Edge scrolling SHALL only activate when the user is dragging selected elements. It SHALL NOT activate during other pointer operations.
 
 #### Scenario: Drawing a new shape near the edge
 - **GIVEN** the user is performing a non-drag pointer operation (drawing a new rectangle)

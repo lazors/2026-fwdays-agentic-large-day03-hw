@@ -10021,13 +10021,19 @@ class App extends React.Component<AppProps, AppState> {
                       edgeSelectedElements.length > 0 &&
                       !this.state.editingFrame
                     ) {
+                      // Note: snap offset and shift-axis lock are not applied
+                      // during the RAF auto-pan tick because they depend on
+                      // the pointer event (event.shiftKey, snap caching) which
+                      // is unavailable here. The next pointermove will re-apply
+                      // the full constrained-drag pipeline. Grid snapping is
+                      // applied to keep elements aligned during auto-pan.
                       dragSelectedElements(
                         pointerDownState,
                         edgeSelectedElements,
                         edgeDragOffset,
                         this.scene,
                         { x: 0, y: 0 },
-                        null,
+                        this.getEffectiveGridSize(),
                       );
                     }
                   },

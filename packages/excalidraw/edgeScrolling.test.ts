@@ -7,6 +7,7 @@ import {
   stopEdgeScroll,
   updateEdgeScrollPointer,
   EDGE_THRESHOLD,
+  MAX_SPEED,
 } from "./edgeScrolling";
 
 describe("getEdgeScrollDelta", () => {
@@ -93,6 +94,12 @@ describe("getEdgeScrollDelta", () => {
     const atNaN = getEdgeScrollDelta(0, 400, viewportWidth, viewportHeight, NaN);
     expect(atNaN.dx).toBeCloseTo(at1x.dx);
     expect(atNaN.dy).toBeCloseTo(at1x.dy);
+  });
+
+  it("clamps deltas to MAX_SPEED when pointer is outside viewport (negative coords)", () => {
+    const { dx, dy } = getEdgeScrollDelta(-100, -50, viewportWidth, viewportHeight, zoom);
+    expect(dx).toBe(-MAX_SPEED);
+    expect(dy).toBe(-MAX_SPEED);
   });
 
   it("gives approximately 50% speed at halfway into the edge zone", () => {
